@@ -1,0 +1,39 @@
+ul.tree-list,
+ul.tree-list ul,
+ul.tree-list li {
+    margin         : 0;
+    padding        : 0;
+    list-style-type: none;
+}
+
+ul.tree-list ul {
+    padding-left: 0.3em;
+}
+ul.tree-list li {
+    border-left : 1px dotted #000;
+    padding-left: 13px;
+    background  : url('../images/dotted.gif') scroll no-repeat 1px 0.8em;
+}
+ul.tree-list ul > li:last-child {
+    border-left-width: 0;
+    padding-left     : 14px;
+    background       : url('../images/dottedangle.gif') scroll no-repeat left top;
+}
+ul.tree-list a {
+    text-decoration: none;
+}
+ul.tree-list a:hover {
+    text-decoration: underline;
+}
+
+ul.tree-list li {
+    text-align : justify;
+    line-height: 25px;
+}
+
+.file-list {
+    border       : 1px solid #cccccc40;
+    padding      : 10px;
+    border-radius: 5px;
+    background   : #fbfbfb;
+}
