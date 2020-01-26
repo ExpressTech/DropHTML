@@ -179,7 +179,7 @@ class Upload {
      * @param Array $columns - Current columns on the list post
      */
     public function add_new_columns($columns){
-        $column_meta = array( 'hits' => 'Hits', 'username' => 'Username' );
+        $column_meta = array( 'username' => 'Username' );
         $columns = array_slice( $columns, 0, 6, true ) + $column_meta + array_slice( $columns, 6, NULL, true );
         return $columns;
     }
