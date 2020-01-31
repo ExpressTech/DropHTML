@@ -1,4 +1,4 @@
-=== DropHTML ===
+=== DropHTML - Host Static Landing Pages with WordPress ===
 Contributors: expresstech
 Tags: static files, landing page, html files, host static files
 Requires at least: 4.8
