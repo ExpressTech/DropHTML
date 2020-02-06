@@ -1,5 +1,7 @@
 <?php
+
 namespace DropHTML\Frontend;
+
 use PclZip;
 
 /**
@@ -15,10 +17,10 @@ class ContentsView
     {
         mbstring_binary_safe_encoding();
 
-        require_once( ABSPATH . 'wp-admin/includes/class-pclzip.php' );
+        require_once(ABSPATH . 'wp-admin/includes/class-pclzip.php');
 
         add_filter('wp_enqueue_scripts', [$this, 'wp_enqueue_style']);
-        add_filter('single_template', [ $this, 'frontend_template' ]);
+        add_filter('single_template', [$this, 'frontend_template']);
     }
 
     /**
@@ -26,7 +28,7 @@ class ContentsView
      */
     public function isValidPostType()
     {
-        if ('drop' == get_post_type()) {
+        if ('drop' === get_post_type()) {
             return true;
         }
         return false;
@@ -54,7 +56,7 @@ class ContentsView
     }
 
     /**
-     * Helper methong to list folders in a list
+     * Helper method to list folders in a list
      */
     public function recursiveFileStructure($fileStructure)
     {
@@ -105,7 +107,7 @@ class ContentsView
     /**
      * List or show upload form
      */
-    function showFileList( $id )
+    function showFileList($id)
     {
         if (!$this->isValidPostType()) {
             return false;
@@ -127,9 +129,9 @@ class ContentsView
                 $filesize = size_format(filesize($path));
                 $filename = basename($path);
 
-                $html = '<div>Name: ' . $filename . '</div>';
-                $html .= '<div>Size: ' . $filesize . '</div>';
-                $html .= '<div>Files:</div>';
+                $html = '<div>' . __('Name:', 'drophtml') . ' ' . $filename . '</div>';
+                $html .= '<div>' . __('Size:', 'drophtml') . ' ' . $filesize . '</div>';
+                $html .= '<div>' . __('Files:', 'drophtml') . '</div>';
 
                 $zip = new PclZip($path);
                 $fileStructure = $this->flatToTree($zip->listContent());
@@ -144,30 +146,29 @@ class ContentsView
             }
 
             reset_mbstring_encoding();
-
         } else {
             wp_nonce_field(plugin_basename(__FILE__), 'wp_custom_attachment_nonce');
             $html = '<p class="description">';
-            $html .= 'Upload your ZIP here.';
+            $html .= __('Upload your ZIP here.', 'drophtml');
             $html .= '</p>';
             $html .= '<input type="file" id="wp_custom_attachment" name="wp_custom_attachment" value="" size="25">';
         }
 
         $output = '<div class="drophtml-file-view">';
-            $output .= $html;
+        $output .= $html;
         $output .= '</div>';
 
         return $output;
     }
 
-    function frontend_template($template) {
+    function frontend_template($template)
+    {
         global $post;
 
         if ($this->isValidPostType()) {
-            return plugin_dir_path( DROPHTML__FILE__) . '/templates/single-drop.php';
+            return plugin_dir_path(DROPHTML__FILE__) . '/templates/single-drop.php';
         }
-        
+
         return $template;
     }
-
 }

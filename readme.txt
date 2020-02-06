@@ -1,4 +1,4 @@
-=== DropHTML ===
+=== DropHTML - Host Static Landing Pages with WordPress ===
 Contributors: expresstech
 Tags: static files, landing page, html files, host static files
 Requires at least: 4.8
@@ -10,6 +10,8 @@ Simply drop static HTML zip files and see the magic!
 
 == Description ==
 DropHTML is a revolutionary plugin to host your static HTML, JS and CSS files. You can simply zip folder of your static files and drop it on your WordPress admin panel via DropHTML plugin. 
+
+[View Demo](https://demo.drophtml.com/drop/landing-page-demo/)
 
 Once you upload your zip file you will get /drop/ url which hosts the HTML files. 
 
