@@ -27,7 +27,6 @@ class Upload {
 
         add_filter("manage_edit-{$this->post_type}_columns",  [$this, 'add_new_columns']);
         add_filter("manage_edit-{$this->post_type}_sortable_columns", [$this, 'register_sortable_columns']);
-        add_filter("request", [$this, 'hits_column_orderby']);
         add_filter('post_row_actions', [$this, 'action_row'], 10, 2);
         add_action('before_delete_post', [$this, 'delete_all_attached_media']);
     }
@@ -46,7 +45,7 @@ class Upload {
      * Load pload metabox
      */
     public function add_custom_meta_boxes() {  
-        add_meta_box('wp_custom_attachment', 'Drop File', [ $this, 'wp_custom_attachment' ], $this->post_type, 'normal', 'high');  
+        add_meta_box('wp_custom_attachment', __( 'Drop File', 'drophtml' ), [ $this, 'wp_custom_attachment' ], $this->post_type, 'normal', 'high');  
     }
 
     /**
@@ -141,17 +140,17 @@ class Upload {
             if( in_array($uploaded_type, $supported_types) ) {
                 $upload = wp_upload_bits($_FILES['wp_custom_attachment']['name'], null, file_get_contents($_FILES['wp_custom_attachment']['tmp_name']));
                 if(isset($upload['error']) && $upload['error'] != 0) {
-                    wp_die('There was an error uploading your file. The error is: ' . $upload['error']);
+                    wp_die( __( 'There was an error uploading your file. The error is:', 'drophtml' ) . ' ' . $upload['error']);
                 } else {
                     $extract = $this->unZipToBaseFolder($id, $upload['file'], $_FILES['wp_custom_attachment']['name'], false );
                     if ($extract) {
                         update_post_meta($id, 'wp_custom_attachment', $upload);
                     } else {
-                        wp_die("Error extracting the file.");
+                        wp_die( __( 'Error extracting the file.', 'drophtml') );
                     }
                 }
             } else {
-                wp_die("The file type that you've uploaded is not a ZIP file.");
+                wp_die(__('The file type that you\'ve uploaded is not a ZIP file.', 'drophtml') );
             }
         }
     }
@@ -179,27 +178,15 @@ class Upload {
      * @param Array $columns - Current columns on the list post
      */
     public function add_new_columns($columns){
-        $column_meta = array( 'username' => 'Username' );
+        $column_meta = array( 'username' => __( 'Username', 'drophtml' ) );
         $columns = array_slice( $columns, 0, 6, true ) + $column_meta + array_slice( $columns, 6, NULL, true );
         return $columns;
     }
 
     // Register the columns as sortable
     public function register_sortable_columns( $columns ) {
-        $columns['hits'] = 'hits';
         $columns['username'] = 'username';
         return $columns;
-    }
-
-    //Add filter to the request to make the hits sorting process numeric, not string
-    public function hits_column_orderby( $vars ) {
-        if ( isset( $vars['orderby'] ) && 'hits' == $vars['orderby'] ) {
-            $vars = array_merge( $vars, array(
-                'meta_key' => 'hits',
-                'orderby' => 'meta_value_num'
-            ) );
-        }
-        return $vars;
     }
 
     /**
@@ -213,12 +200,8 @@ class Upload {
         global $post;
 
         switch ( $column ) {
-            case 'hits':
-                $hits = get_post_meta( $post->ID, 'hits', true );
-                echo (int)$hits;
-            break;
             case 'username':
-                echo get_the_author_meta('user_login', $post->post_author);
+                echo get_the_author_meta( 'user_login', $post->post_author );
                 break;
         }
     }
@@ -228,7 +211,7 @@ class Upload {
             unset($actions['view']);
             unset($actions['inline hide-if-no-js']);
             $url = get_post_meta($post->ID, 'drop_preview_url', true);
-            $actions['demo'] = '<a href="'. $url . '/">Preview</a>';
+            $actions['demo'] = '<a href="'. $url . '/">'. __( 'Preview', 'drophtml' ) . '</a>';
         }
         return $actions;
     }

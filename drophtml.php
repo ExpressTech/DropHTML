@@ -47,7 +47,7 @@ if ( ! drop_html_is_php_version_compatible() ) {
  * @return void
  */
 function drop_html_fail_php_version() {
-    $message = esc_html__( 'DropHtml requires PHP version 5.4+, plugin is currently NOT ACTIVE.', 'drop_html' );
+    $message = esc_html__( 'DropHtml requires PHP version 5.4+, plugin is currently NOT ACTIVE.', 'drophtml' );
     $html_message = sprintf( '<div class="error">%s</div>', wpautop( $message ) );
     echo wp_kses_post( $html_message );
 }
@@ -95,6 +95,6 @@ function drop_html() {
     return DropHtml\Plugin::instance();
 }
 
-if ( ! defined( 'QAZANA_TESTS' ) ) {
+if ( ! defined('DROPHTML_TESTS' ) ) {
     drop_html();
 }
