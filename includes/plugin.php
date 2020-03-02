@@ -18,6 +18,7 @@ class Plugin {
 	 * @var object
 	 */
 	public static $instance = null;
+	public $data = array();
 
 	/** Magic Methods *********************************************************/
 
