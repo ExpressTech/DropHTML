@@ -135,6 +135,20 @@ class Upload {
         if ( ! $this->isValidPostType() ) {
             return false;
         }
+		if (isset($_POST['post_name']) && !empty($_POST['post_name'])) {
+			$post = get_post($id);
+			$newslug = $_POST['post_name'];
+			$drop_url = get_post_meta($id, 'drop_preview_url', true);
+			$new_drop_url = trailingslashit(get_site_url()) . trailingslashit('drop') . $newslug;
+			/**
+			 * Rename Folder
+			 */
+			$oldpath = str_replace(site_url('/'), ABSPATH, esc_url($drop_url));
+			$newpath = str_replace(site_url('/'), ABSPATH, esc_url($new_drop_url));
+			if (rename($oldpath, $newpath)) {
+				update_post_meta($id, 'drop_preview_url', $new_drop_url);
+			}
+		}
         if(!empty($_FILES['wp_custom_attachment']['name'])) {
             $supported_types = array('application/zip', 'application/octet-stream', 'application/x-zip-compressed','multipart/x-zip');
             $arr_file_type = wp_check_filetype(basename($_FILES['wp_custom_attachment']['name']));
