@@ -58,7 +58,7 @@ class ContentsView
     /**
      * Helper method to list folders in a list
      */
-    public function recursiveFileStructure($fileStructure)
+    public function recursiveFileStructure($fileStructure, $url='')
     {
         $output = '';
         foreach ($fileStructure as $folder => $children) {
@@ -70,13 +70,22 @@ class ContentsView
                 if ($this->isFolder($folder) && !empty($folder)) {
                     $output .= '<strong>' . $folder . '/</strong>';
                 } elseif ($folder && !empty($folder)) {
-                    $output .= '<li>' . $folder . '</li>';
+					$file_path = str_replace(site_url('/'), '', esc_url($url));
+					$file_url = $url.'/'.$children;
+                    $output .= '<li class="tree-file">';
+                    $output .= $folder;
+                    $output .= '<div class="file-actions">';
+                    $output .= '<a href="'.$file_url.'" target="_blank">'. __( 'Preview', 'drophtml' ) . '</a>';
+                    //$output .= '<a href="#">'. __( 'Edit', 'drophtml' ) . '</a>';
+                    $output .= '<a href="javascript:void(0)" class="delete-tree-file" data-path="'.$file_path.'" data-file="'.$children.'">'. __( 'Delete', 'drophtml' ) . '</a>';
+                    $output .= '</div>';
+                    $output .= '</li>';
                 }
             }
 
             if (is_array($children) && !empty($children)) {
                 $output .= '<ul class="folder">';
-                $output .= $this->recursiveFileStructure($children);
+                $output .= $this->recursiveFileStructure($children, $url);
                 $output .= '</ul>';
             }
 
@@ -114,6 +123,7 @@ class ContentsView
         }
 
         $file = get_post_meta($id, 'wp_custom_attachment', true);
+		$drop_url = get_post_meta($id, 'drop_preview_url', true);
 
         if ($file) {
 
@@ -139,9 +149,10 @@ class ContentsView
                 $html .= '<pre class="file-list">';
                 $html .= '<ul id="tree-list" class="tree-list" role="tree" aria-labelledby="plugin-files-label">';
                 if ($fileStructure) {
-                    $html .= $this->recursiveFileStructure($fileStructure);
+                    $html .= $this->recursiveFileStructure($fileStructure, $drop_url);
                 }
                 $html .= '</ul>';
+                $html .= '<input type="hidden" id="zip-file-url" value="'.$path.'">';
                 $html .= '</pre>';
             }
 

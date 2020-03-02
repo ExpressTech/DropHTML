@@ -194,6 +194,27 @@ function expandCollapseAll(oElID,oState) {
 				oLnk.onclick();
 } } } }
 
-jQuery(function ($){
-   compactMenu('tree-list',true, '');
+jQuery(function ($) {
+	compactMenu('tree-list', true, '');
+
+	jQuery(document).on('click', '.delete-tree-file', function () {
+		var $thisele = jQuery(this);
+		var zip = jQuery('#zip-file-url').val();
+		var path = jQuery(this).attr('data-path');
+		var file = jQuery(this).attr('data-file');
+		if (confirm('Are you sure you want to remove this file?')) {
+			jQuery.ajax({type: "post", dataType: "json",
+				url: ajaxurl,
+				data: {action: 'delete_tree_file', path: path, file: file, zip: zip},
+				success: function (msg) {
+					if (msg != 1) {
+						return false;
+					} else {
+						$thisele.parent('div').parent('li').remove();
+					}
+				}
+			});
+		}
+		return false;
+	});
 });
