@@ -211,7 +211,7 @@ class Upload {
             unset($actions['view']);
             unset($actions['inline hide-if-no-js']);
             $url = get_post_meta($post->ID, 'drop_preview_url', true);
-            $actions['demo'] = '<a href="'. $url . '/">'. __( 'Preview', 'drophtml' ) . '</a>';
+            $actions['demo'] = '<a href="'. $url . '/" target="_blank">'. __( 'Preview', 'drophtml' ) . '</a>';
         }
         return $actions;
     }
