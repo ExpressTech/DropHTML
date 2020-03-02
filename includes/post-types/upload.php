@@ -29,7 +29,10 @@ class Upload {
         add_filter("manage_edit-{$this->post_type}_sortable_columns", [$this, 'register_sortable_columns']);
         add_filter('post_row_actions', [$this, 'action_row'], 10, 2);
         add_action('before_delete_post', [$this, 'delete_all_attached_media']);
-    }
+
+		add_action('wp_ajax_nopriv_delete_tree_file', [$this, 'delete_tree_file']);
+		add_action('wp_ajax_delete_tree_file', [$this, 'delete_tree_file']);
+	}
 
     /**
      * Helper function to check correct post type.
@@ -226,5 +229,27 @@ class Upload {
             }
         }
     }
+
+	function delete_tree_file() {
+		$result = '0';
+		if (isset($_POST['path']) && !empty($_POST['path'])) {
+			$zipfile = $_POST['zip'];
+			$path = $_POST['path'];
+			$file = $_POST['file'];
+
+			$zip = new \ZipArchive();
+			$zip->open($zipfile);
+			$zip->deleteName($file);
+			$zip->close();
+
+			$file_path = trailingslashit(ABSPATH) . $path . '/' . $file;
+			if (file_exists($file_path)) {
+				unlink($file_path);
+			}
+			$result = '1';
+		}
+		echo $result;
+		exit;
+	}
 
 }
