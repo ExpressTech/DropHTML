@@ -52,7 +52,7 @@ class ContentsView
     public function isFolder($path)
     {
         $path_info = pathinfo($path);
-        return $path_info['extension'] ? false : true;
+        return (isset($path_info['extension'])) ? false : true;
     }
 
     /**
