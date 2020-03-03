@@ -113,66 +113,103 @@ class ContentsView
         return $tree_list;
     }
 
-    /**
+	function listFolderFiles($dir, $url = '') {
+		$ffs = scandir($dir);
+
+		unset($ffs[array_search('.', $ffs, true)]);
+		unset($ffs[array_search('..', $ffs, true)]);
+
+		if (count($ffs) < 1) {
+			return;
+		}
+		$output = '';
+		foreach ($ffs as $ff) {
+			$output .= '<li>';
+
+			$file_path = str_replace(ABSPATH, '', $dir);
+			$file_url = site_url('/') . $file_path . '/' . $ff;
+			if (is_dir($dir . '/' . $ff)) {
+				$output .= '<strong>' . $ff . '/</strong>';
+			} else {
+				$output .= '<div class="tree-file">' . $ff;
+				$output .= '<div class="file-actions">';
+				$output .= '<a href="' . $file_url . '" target="_blank">' . __('Preview', 'drophtml') . '</a>';
+				//$output .= '<a href="#">'. __( 'Edit', 'drophtml' ) . '</a>';
+				$output .= '<a href="javascript:void(0)" class="delete-tree-file" data-path="' . $file_path . '" data-file="' . $ff . '">' . __('Delete', 'drophtml') . '</a>';
+				$output .= '</div>';
+				$output .= '</div>';
+			}
+			if (is_dir($dir . '/' . $ff)) {
+				$output .= '<ul class="folder">';
+				$output .= $this->listFolderFiles($dir . '/' . $ff, $url);
+				$output .= '</ul>';
+			}
+			$output .= '</li>';
+		}
+
+		return $output;
+	}
+
+	/**
      * List or show upload form
      */
-    function showFileList($id)
-    {
-        if (!$this->isValidPostType()) {
-            return false;
-        }
+    function showFileList($id) {
+		if (!$this->isValidPostType()) {
+			return false;
+		}
 
-        $file = get_post_meta($id, 'wp_custom_attachment', true);
+		$file = get_post_meta($id, 'wp_custom_attachment', true);
 		$drop_url = get_post_meta($id, 'drop_preview_url', true);
+		$drop_path = str_replace(site_url('/'), ABSPATH, esc_url($drop_url));
 
-        if ($file) {
+		$html = '';
+		if ($file) {
+			mbstring_binary_safe_encoding();
 
-            mbstring_binary_safe_encoding();
+			//get the url
+			$url = $file['url'];
 
-            //get the url
-            $url = $file['url'];
+			//Replace url to directory path
+			$path = str_replace(site_url('/'), ABSPATH, esc_url($url));
 
-            //Replace url to directory path
-            $path = str_replace(site_url('/'), ABSPATH, esc_url($url));
+			if (is_file($path)) {
+				$filesize = size_format(filesize($path));
+				$filename = basename($path);
 
-            if (is_file($path)) {
-                $filesize = size_format(filesize($path));
-                $filename = basename($path);
+				$html = '<div>' . __('Name:', 'drophtml') . ' ' . $filename . '</div>';
+				$html .= '<div>' . __('Size:', 'drophtml') . ' ' . $filesize . '</div>';
+				$html .= '<div>' . __('Files:', 'drophtml') . '</div>';
 
-                $html = '<div>' . __('Name:', 'drophtml') . ' ' . $filename . '</div>';
-                $html .= '<div>' . __('Size:', 'drophtml') . ' ' . $filesize . '</div>';
-                $html .= '<div>' . __('Files:', 'drophtml') . '</div>';
+				$html .= '<pre class="file-list">';
+				$html .= '<ul id="tree-list" class="tree-list" role="tree" aria-labelledby="plugin-files-label">';
+					$html .= $this->listFolderFiles($drop_path, $drop_url);
+					/*$zip = new PclZip($path);
+					$fileStructure = $this->flatToTree($zip->listContent());
+					if ($fileStructure) {
+						 $html .= $this->recursiveFileStructure($fileStructure, $drop_url);
+					}*/
+				$html .= '</ul>';
+				$html .= '<input type="hidden" id="zip-file-url" value="' . $path . '">';
+				$html .= '</pre>';
+			}
 
-                $zip = new PclZip($path);
-                $fileStructure = $this->flatToTree($zip->listContent());
+			reset_mbstring_encoding();
+		} else {
+			wp_nonce_field(plugin_basename(__FILE__), 'wp_custom_attachment_nonce');
+			$html = '<p class="description">';
+			$html .= __('Upload your ZIP here.', 'drophtml');
+			$html .= '</p>';
+			$html .= '<input type="file" id="wp_custom_attachment" name="wp_custom_attachment" value="" size="25">';
+		}
 
-                $html .= '<pre class="file-list">';
-                $html .= '<ul id="tree-list" class="tree-list" role="tree" aria-labelledby="plugin-files-label">';
-                if ($fileStructure) {
-                    $html .= $this->recursiveFileStructure($fileStructure, $drop_url);
-                }
-                $html .= '</ul>';
-                $html .= '<input type="hidden" id="zip-file-url" value="'.$path.'">';
-                $html .= '</pre>';
-            }
+		$output = '<div class="drophtml-file-view">';
+		$output .= $html;
+		$output .= '</div>';
 
-            reset_mbstring_encoding();
-        } else {
-            wp_nonce_field(plugin_basename(__FILE__), 'wp_custom_attachment_nonce');
-            $html = '<p class="description">';
-            $html .= __('Upload your ZIP here.', 'drophtml');
-            $html .= '</p>';
-            $html .= '<input type="file" id="wp_custom_attachment" name="wp_custom_attachment" value="" size="25">';
-        }
+		return $output;
+	}
 
-        $output = '<div class="drophtml-file-view">';
-        $output .= $html;
-        $output .= '</div>';
-
-        return $output;
-    }
-
-    function frontend_template($template)
+	function frontend_template($template)
     {
         global $post;
 
