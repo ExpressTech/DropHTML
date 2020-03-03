@@ -42,7 +42,7 @@ ul.tree-list li {
 li.tree-file:hover{
     background: #f1f1f1;
 }
-li.tree-file:hover .file-actions{display:inline-block;}
+.tree-file:hover .file-actions{display:inline-block;}
 .file-actions{
     position: absolute;
     top: 0;
