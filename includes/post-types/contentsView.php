@@ -125,7 +125,6 @@ class ContentsView
 		$output = '';
 		foreach ($ffs as $ff) {
 			$output .= '<li>';
-
 			$file_path = str_replace(ABSPATH, '', $dir);
 			$file_url = site_url('/') . $file_path . '/' . $ff;
 			if (is_dir($dir . '/' . $ff)) {
@@ -166,11 +165,17 @@ class ContentsView
 		if ($file) {
 			mbstring_binary_safe_encoding();
 
-			//get the url
+			$site_url = site_url('/');
+			$parsed_site_url = parse_url($site_url);
 			$url = $file['url'];
+			if ($parsed_site_url['scheme'] == 'https') {
+				$url = str_replace("http://", "https://", $url);
+			} else {
+				$url = str_replace("https://", "http://", $url);
+			}
 
 			//Replace url to directory path
-			$path = str_replace(site_url('/'), ABSPATH, esc_url($url));
+			$path = str_replace($site_url, ABSPATH, esc_url($url));
 
 			if (is_file($path)) {
 				$filesize = size_format(filesize($path));
