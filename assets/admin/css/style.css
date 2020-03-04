@@ -22,10 +22,11 @@ ul.tree-list ul > li:last-child {
 ul.tree-list a {
     text-decoration: none;
 }
-ul.tree-list a:hover {
+ul.tree-list a:hover, ul.tree-list a:focus {
     text-decoration: underline;
+    box-shadow: none;
 }
-
+ul.tree-list span{outline:none !important;}
 ul.tree-list li {
     text-align : justify;
     line-height: 25px;
@@ -38,9 +39,9 @@ ul.tree-list li {
     border-radius: 5px;
     background   : #fbfbfb;
 }
-
-li.tree-file:hover{
-    background: #f1f1f1;
+.tree-file{}
+.tree-file:hover{
+    background: #e0eefc;
 }
 .tree-file:hover .file-actions{display:inline-block;}
 .file-actions{
@@ -55,3 +56,77 @@ li.tree-file:hover{
     border-right: 1px solid #DDD;
 }
 .file-actions a:last-child{border:0;}
+.tree-file-editable-area{
+    position: relative;
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+    padding: 10px 0 0;
+    box-sizing: border-box;
+    background: #f7f7f7;
+    border-radius: 5px;
+    box-shadow: 0 0 5px 1px #ddd;
+}
+.tree-file-editable-area .tree-file-editable-submit-area{
+	display: inline-block;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 10px 5px;
+	text-align: right;
+}
+.tree-file-editable-area .tree-file-editable-submit-area input{
+	display: inline-block;
+	cursor: pointer;
+	margin: 5px;
+	padding: 6px 10px;
+	border: 1px solid #aaa;
+	background: #FFF;
+	border-radius: 4px;
+}
+.tree-file-editable-area .updated-msg{display: none;margin: 0 10px;font-size: 14px;font-weight: bold;color: #27cc27;}
+.tree-file-editable-area .error-msg{display: none;margin: 0 10px;font-size: 14px;font-weight: bold;color: #d10404;}
+.save-loader{
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: rgba(1, 78, 110, 0.2);
+}
+.save-loader.active{display: flex;}
+.save-loader .ldr {
+	display: inline-block;
+	position: relative;
+	width: 100px;
+	height: 100px;
+}
+.save-loader .ldr div {
+	position: absolute;
+	border: 5px solid #fff;
+	opacity: 1;
+	border-radius: 50%;
+	animation: save-loader 1s cubic-bezier(0, 0.2, 0.8, 0.8) infinite;
+}
+.save-loader .ldr div:nth-child(2) {
+	animation-delay: -0.5s;
+}
+@keyframes save-loader {
+	0% {
+		top: 36px;
+		left: 36px;
+		width: 0;
+		height: 0;
+		opacity: 1;
+	}
+	100% {
+		top: 0px;
+		left: 0px;
+		width: 72px;
+		height: 72px;
+		opacity: 0;
+	}
+}

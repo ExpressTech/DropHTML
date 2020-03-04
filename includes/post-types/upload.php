@@ -30,8 +30,8 @@ class Upload {
         add_filter('post_row_actions', [$this, 'action_row'], 10, 2);
         add_action('before_delete_post', [$this, 'delete_all_attached_media']);
 
-		add_action('wp_ajax_nopriv_delete_tree_file', [$this, 'delete_tree_file']);
 		add_action('wp_ajax_delete_tree_file', [$this, 'delete_tree_file']);
+		add_action('wp_ajax_save_tree_file', [$this, 'save_tree_file']);
 	}
 
     /**
@@ -246,21 +246,36 @@ class Upload {
 
 	function delete_tree_file() {
 		$result = '0';
-		if (isset($_POST['path']) && !empty($_POST['path'])) {
-			$zipfile = $_POST['zip'];
-			$path = $_POST['path'];
-			$file = $_POST['file'];
-
+		if (isset($_POST['file']) && !empty($_POST['file'])) {
+			/*$zipfile = $_POST['zip'];
 			$zip = new \ZipArchive();
 			$zip->open($zipfile);
 			$zip->deleteName($file);
-			$zip->close();
+			$zip->close();*/
 
-			$file_path = trailingslashit(ABSPATH) . $path . '/' . $file;
+			$file = $_POST['file'];
+			$file_path = trailingslashit(ABSPATH) . $file;
 			if (file_exists($file_path)) {
 				unlink($file_path);
 			}
 			$result = '1';
+		}
+		echo $result;
+		exit;
+	}
+	
+	function save_tree_file() {
+		$result = '0';
+		if (isset($_POST['file']) && !empty($_POST['file'])) {
+			$file = $_POST['file'];
+			$content = $_POST['content'];
+			$content = stripslashes($content);
+			$file_path = trailingslashit(ABSPATH) . $file;
+			
+			$update = file_put_contents($file_path, $content);
+			if ($update !== false) {
+				$result = '1';
+			}
 		}
 		echo $result;
 		exit;
