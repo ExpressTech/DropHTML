@@ -39,10 +39,11 @@ class ContentsView {
 		if (!$this->isValidPostType()) {
 			return false;
 		}
-		$cm_settings['php']['codeEditor'] = wp_enqueue_code_editor(array('type' => 'text/html', 'codemirror' => array('autoRefresh' => true)));
-		$cm_settings['html']['codeEditor'] = wp_enqueue_code_editor(array('type' => 'text/html', 'codemirror' => array('autoRefresh' => true)));
-		$cm_settings['css']['codeEditor'] = wp_enqueue_code_editor(array('type' => 'text/css', 'codemirror' => array('autoRefresh' => true)));
-		$cm_settings['js']['codeEditor'] = wp_enqueue_code_editor(array('type' => 'text/javascript', 'codemirror' => array('autoRefresh' => true)));
+		$cm_settings['php'] = wp_enqueue_code_editor(array('file' => 'example.php', 'codemirror' => array('autoRefresh' => true), 'htmlhint' => array('space-tab-mixed-disabled' => 'space')));
+		$cm_settings['html'] = wp_enqueue_code_editor(array('file' => 'example.html', 'codemirror' => array('autoRefresh' => true), 'htmlhint' => array('space-tab-mixed-disabled' => 'space')));
+		$cm_settings['css'] = wp_enqueue_code_editor(array('file' => 'example.css', 'codemirror' => array('autoRefresh' => true)));
+		$cm_settings['js'] = wp_enqueue_code_editor(array('file' => 'example.js', 'codemirror' => array('autoRefresh' => true)));
+
 		wp_localize_script('jquery', 'cm_settings', $cm_settings);
 		wp_enqueue_script('wp-theme-plugin-editor');
 		wp_enqueue_style('wp-codemirror');
@@ -100,16 +101,25 @@ class ContentsView {
 			$file_path = str_replace(ABSPATH, '', $dir) . '/' . $ff;
 			$file_url = site_url('/') . $file_path;
 			if (is_dir($dir . '/' . $ff)) {
-				$output .= '<strong>' . $ff . '/</strong>';
+				$output .= '<span class="folder-name">' . $ff . '/</span>';
+				/*$output .= '<div class="tree-folder">';
+					$output .= '<div class="folder-actions">';
+						$output .= '<label title="'.__('Upload', 'drophtml').'" class="upload-to-tree-folder" target="_blank">';
+							$output .= '<i class="dashicons dashicons-upload"></i>';
+							$output .= '<input type="file" name="tf[]" multiple="multiple">';
+						$output .= '</label>';
+						$output .= '<span title="'.__('Delete', 'drophtml').'" class="delete-tree-folder" data-folder="' . $file_path . '"><i class="dashicons dashicons-trash"></i></span>';
+					$output .= '</div>';
+				$output .= '</div>';*/
 			} else {
-				$fileSlug = sanitize_title($dir.$ff);
+				$fileSlug = sanitize_title($file_path);
 				$output .= '<div class="tree-file">' . $ff;
 					$output .= '<div class="file-actions">';
-						$output .= '<a href="' . $file_url . '" target="_blank"><span class="dashicons dashicons-visibility"></span></a>';
+						$output .= '<a href="' . $file_url . '" title="'.__('Preview', 'drophtml').'" target="_blank"><span class="dashicons dashicons-visibility"></span></a>';
 						if ($this->isAllowEdit($dir . '/' . $ff)) {
-							$output .= '<a href="javascript:void(0)" class="edit-tree-file" data-ext="'.$this->getFileExt($ff).'" data-slug="'.$fileSlug.'" data-file="' . $file_path . '" data-state="0"><span class="dashicons dashicons-edit"></span></a>';
+							$output .= '<a href="javascript:void(0)" title="'.__('Edit', 'drophtml').'" class="edit-tree-file" data-ext="'.$this->getFileExt($ff).'" data-slug="'.$fileSlug.'" data-file="' . $file_path . '" data-state="0"><span class="dashicons dashicons-edit"></span></a>';
 						}
-						$output .= '<a href="javascript:void(0)" class="delete-tree-file" data-file="' . $file_path . '"><span class="dashicons dashicons-trash"></span></a>';
+						$output .= '<a href="javascript:void(0)" title="'.__('Delete', 'drophtml').'" class="delete-tree-file" data-file="' . $file_path . '"><span class="dashicons dashicons-trash"></span></a>';
 					$output .= '</div>';
 					if ($this->isAllowEdit($dir . '/' . $ff)) {
 						$content = file_get_contents($dir . '/' . $ff);

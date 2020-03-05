@@ -21,10 +21,13 @@ ul.tree-list ul > li:last-child {
 }
 ul.tree-list a {
     text-decoration: none;
+    display: block;
 }
+ul.tree-list a .folder-name{font-weight:bold;}
 ul.tree-list a:hover, ul.tree-list a:focus {
     text-decoration: underline;
     box-shadow: none;
+    background: #e0eefc;
 }
 ul.tree-list span{outline:none !important;}
 ul.tree-list li {
@@ -32,29 +35,47 @@ ul.tree-list li {
     line-height: 25px;
     position: relative;
 }
-
+ul.tree-list label input[type=file]{
+    display: none;
+}
 .file-list {
     border       : 1px solid #cccccc40;
     padding      : 10px;
     border-radius: 5px;
     background   : #fbfbfb;
 }
+.tree-folder{
+    display: inline-block;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
 .tree-file{}
+.tree-folder:hover,
 .tree-file:hover{
     background: #e0eefc;
 }
+li a:hover .folder-actions{display:inline-block;}
 .tree-file:hover .file-actions{display:inline-block;}
+.folder-actions,
 .file-actions{
     position: absolute;
     top: 0;
     right: 0;
     display: none;
 }
+.folder-actions span,
+.folder-actions label,
 .file-actions a{
+    display: inline-block !important;
     font-size: 12px;
     padding: 0 5px;
     border-right: 1px solid #DDD;
+    vertical-align: middle;
 }
+.folder-actions label:last-child,
+.folder-actions span:last-child,
 .file-actions a:last-child{border:0;}
 .tree-file-editable-area{
     position: relative;
