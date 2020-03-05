@@ -207,8 +207,8 @@ jQuery(function ($) {
 		parent.slideToggle();
 		if (active == '0') {
 			jQuery(this).attr('data-state', '1');
-			var settings = cm_settings.ext;
-			var cm_editor = wp.codeEditor.initialize($('#editor-'+slug+'-textarea'), settings);
+			var settings = cm_settings[ext];
+			var cm_editor = wp.codeEditor.initialize(jQuery('#editor-'+slug+'-textarea'), settings);
 			parent.find('.CodeMirror-code').on('keyup',function(){
 				$('#editor-'+slug+'-textarea').text(cm_editor.codemirror.getValue());
 				$('#editor-'+slug+'-textarea').trigger('change');
