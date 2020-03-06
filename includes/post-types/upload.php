@@ -30,8 +30,10 @@ class Upload {
         add_filter('post_row_actions', [$this, 'action_row'], 10, 2);
         add_action('before_delete_post', [$this, 'delete_all_attached_media']);
 
+		add_action('wp_ajax_delete_tree_folder', [$this, 'delete_tree_folder']);
 		add_action('wp_ajax_delete_tree_file', [$this, 'delete_tree_file']);
 		add_action('wp_ajax_save_tree_file', [$this, 'save_tree_file']);
+		add_action('wp_ajax_upload_to_tree_folder', [$this, 'upload_to_tree_folder']);
 	}
 
     /**
@@ -243,7 +245,45 @@ class Upload {
             }
         }
     }
+	function deleteDirectory($dir) {
+		if (!file_exists($dir)) {
+			return true;
+		}
+		if (!is_dir($dir)) {
+			return unlink($dir);
+		}
+		foreach (scandir($dir) as $item) {
+			if ($item == '.' || $item == '..') {
+				continue;
+			}
+			if (!$this->deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+				return false;
+			}
+		}
 
+		return rmdir($dir);
+	}
+
+	function delete_tree_folder() {
+		$result = '0';
+		if (isset($_POST['folder']) && !empty($_POST['folder'])) {
+			/*$zipfile = $_POST['zip'];
+			$zip = new \ZipArchive();
+			$zip->open($zipfile);
+			$zip->deleteName($file);
+			$zip->close();*/
+
+			$folder = $_POST['folder'];
+			$folder_path = trailingslashit(ABSPATH) . $folder;
+			if (file_exists($folder_path)) {
+				$this->deleteDirectory($folder_path);
+			}
+			$result = '1';
+		}
+		echo $result;
+		exit;
+	}
+	
 	function delete_tree_file() {
 		$result = '0';
 		if (isset($_POST['file']) && !empty($_POST['file'])) {
@@ -274,6 +314,37 @@ class Upload {
 			
 			$update = file_put_contents($file_path, $content);
 			if ($update !== false) {
+				$result = '1';
+			}
+		}
+		echo $result;
+		exit;
+	}
+
+	function upload_to_tree_folder() {
+		$result = '0';
+		if (isset($_POST['folder']) && !empty($_POST['folder'])) {
+			$folder = $_POST['folder'];
+			$folder_path = trailingslashit(ABSPATH) . $folder;
+			if ($_FILES) {
+				require_once(ABSPATH . "wp-admin" . '/includes/image.php');
+				require_once(ABSPATH . "wp-admin" . '/includes/file.php');
+				require_once(ABSPATH . "wp-admin" . '/includes/media.php');
+				$files = $_FILES['tf'];
+				$count = 0;
+				foreach ($files['name'] as $count => $value) {
+					if ($files['name'][$count]) {
+						$file = array(
+							'name' => $files['name'][$count],
+							'type' => $files['type'][$count],
+							'tmp_name' => $files['tmp_name'][$count],
+							'error' => $files['error'][$count],
+							'size' => $files['size'][$count]
+						);
+						$new_file = $folder_path . '/' . $file['name'];
+						$move_new_file = @move_uploaded_file( $file['tmp_name'], $new_file );
+					}
+				}
 				$result = '1';
 			}
 		}
