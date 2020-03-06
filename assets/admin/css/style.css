@@ -36,6 +36,7 @@
 	background:transparent;
 	box-shadow: none;
 }
+.file-explorer .jstree-anchor:hover,
 .file-explorer .jstree-anchor.jstree-clicked.jstree-hovered,
 .file-explorer .jstree-anchor.jstree-hovered {
     background: #e7f4f9;
