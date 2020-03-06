@@ -52,7 +52,9 @@ class ContentsView {
 		if (!$this->isValidPostType()) {
 			return false;
 		}
+		wp_enqueue_style('jstree-css', plugins_url('assets/admin/js/themes/default/style.css', DROPHTML__FILE__), [], '1.0.0', 'all');
 		wp_enqueue_style('drops-upload-form', plugins_url('assets/admin/css/style.css', DROPHTML__FILE__), [], '1.0.0', 'all');
+		wp_enqueue_script('jstree', plugins_url('assets/admin/js/jstree.js', DROPHTML__FILE__), ['jquery'], '1.0.0');
 		wp_enqueue_script('drops-upload-form', plugins_url('assets/admin/js/main.js', DROPHTML__FILE__), ['jquery'], '1.0.0');
 	}
 
@@ -97,29 +99,30 @@ class ContentsView {
 		}
 		$output = '';
 		foreach ($ffs as $ff) {
-			$output .= '<li>';
+			$output .= '<li class="'.( is_dir($dir . '/' . $ff) ? 'folder-node' : '').'">';
 			$file_path = str_replace(ABSPATH, '', $dir) . '/' . $ff;
 			$file_url = site_url('/') . $file_path;
 			if (is_dir($dir . '/' . $ff)) {
-				$output .= '<span class="folder-name">' . $ff . '/</span>';
-				/*$output .= '<div class="tree-folder">';
+				$output .= '<div class="tree-folder">';
+					$output .= '<span class="folder-name"><strong>' . $ff.'/</strong></span>';
 					$output .= '<div class="folder-actions">';
-						$output .= '<label title="'.__('Upload', 'drophtml').'" class="upload-to-tree-folder" target="_blank">';
+						$output .= '<label title="'.__('Upload', 'drophtml').'" class="upload-to-tree-folder" data-folder="' . $file_path . '">';
 							$output .= '<i class="dashicons dashicons-upload"></i>';
 							$output .= '<input type="file" name="tf[]" multiple="multiple">';
 						$output .= '</label>';
-						$output .= '<span title="'.__('Delete', 'drophtml').'" class="delete-tree-folder" data-folder="' . $file_path . '"><i class="dashicons dashicons-trash"></i></span>';
+						$output .= '<a href="javascript:void(0)" title="'.__('Delete', 'drophtml').'" class="delete-tree-folder" data-folder="' . $file_path . '"><i class="dashicons dashicons-trash"></i></a>';
 					$output .= '</div>';
-				$output .= '</div>';*/
+				$output .= '</div>';
 			} else {
 				$fileSlug = sanitize_title($file_path);
-				$output .= '<div class="tree-file">' . $ff;
+				$output .= '<div class="tree-file">';
+					$output .= '<span class="file-name">' . $ff.'</span>';
 					$output .= '<div class="file-actions">';
-						$output .= '<a href="' . $file_url . '" title="'.__('Preview', 'drophtml').'" target="_blank"><span class="dashicons dashicons-visibility"></span></a>';
+						$output .= '<a href="javascript:void(0)" onclick="window.open(\'' . $file_url . '\', \'_blank\');"" title="'.__('Preview', 'drophtml').'" target="_blank"><i class="dashicons dashicons-visibility"></i></a>';
 						if ($this->isAllowEdit($dir . '/' . $ff)) {
-							$output .= '<a href="javascript:void(0)" title="'.__('Edit', 'drophtml').'" class="edit-tree-file" data-ext="'.$this->getFileExt($ff).'" data-slug="'.$fileSlug.'" data-file="' . $file_path . '" data-state="0"><span class="dashicons dashicons-edit"></span></a>';
+							$output .= '<a href="javascript:void(0)" title="'.__('Edit', 'drophtml').'" class="edit-tree-file" data-ext="'.$this->getFileExt($ff).'" data-slug="'.$fileSlug.'" data-file="' . $file_path . '" data-state="0"><i class="dashicons dashicons-edit"></i></a>';
 						}
-						$output .= '<a href="javascript:void(0)" title="'.__('Delete', 'drophtml').'" class="delete-tree-file" data-file="' . $file_path . '"><span class="dashicons dashicons-trash"></span></a>';
+						$output .= '<a href="javascript:void(0)" title="'.__('Delete', 'drophtml').'" class="delete-tree-file" data-file="' . $file_path . '"><i class="dashicons dashicons-trash"></i></a>';
 					$output .= '</div>';
 					if ($this->isAllowEdit($dir . '/' . $ff)) {
 						$content = file_get_contents($dir . '/' . $ff);
@@ -154,7 +157,7 @@ class ContentsView {
 		if (!$this->isValidPostType()) {
 			return false;
 		}
-
+		$post = get_post($id);
 		$file = get_post_meta($id, 'wp_custom_attachment', true);
 		$drop_url = get_post_meta($id, 'drop_preview_url', true);
 		$drop_path = str_replace(site_url('/'), ABSPATH, esc_url($drop_url));
@@ -183,12 +186,27 @@ class ContentsView {
 				$html .= '<div>' . __('Size:', 'drophtml') . ' ' . $filesize . '</div>';
 				$html .= '<div>' . __('Files:', 'drophtml') . '</div>';
 
-				$html .= '<pre class="file-list">';
-				$html .= '<ul id="tree-list" class="tree-list" role="tree" aria-labelledby="plugin-files-label">';
-				$html .= $this->listFolderFiles($drop_path, $drop_url);
-				$html .= '</ul>';
-				$html .= '<input type="hidden" id="zip-file-url" value="' . $path . '">';
-				$html .= '</pre>';
+				$html .= '<div class="file-explorer">';
+					$html .= '<div class="upload-loader"><div class="ldr"><div></div><div></div></div></div>';
+					$html .= '<div class="main-folder jstree-anchor">';
+						$html .= '<div class="tree-folder">';
+							$html .= '<span class="folder-name"><strong>' . $post->post_name.'/</strong></span>';
+							$html .= '<div class="folder-actions">';
+								$html .= '<label title="'.__('Upload', 'drophtml').'" class="upload-to-tree-folder" data-folder="' . str_replace(ABSPATH, '', $drop_path) . '">';
+									$html .= '<i class="dashicons dashicons-upload"></i>';
+									$html .= '<input type="file" name="tf[]" multiple="multiple">';
+								$html .= '</label>';
+							$html .= '</div>';
+						$html .= '</div>';
+					$html .= '</div>';
+					$html .= '<div id="jstree_demo_div" class="demo">';
+						$html .= '<ul id="tree-list" class="tree-list" role="tree" aria-labelledby="plugin-files-label">';
+							$html .= $this->listFolderFiles($drop_path, $drop_url);
+						$html .= '</ul>';
+						$html .= '<input type="hidden" id="zip-file-url" value="' . $path . '">';
+					$html .= '</div>';
+					$html .= '<script>jQuery(function ($) { $("#jstree_demo_div").jstree(); });</script>';
+				$html .= '</div>';
 			}
 
 			reset_mbstring_encoding();
