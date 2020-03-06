@@ -118,7 +118,7 @@ class ContentsView {
 				$output .= '<div class="tree-file">';
 					$output .= '<span class="file-name">' . $ff.'</span>';
 					$output .= '<div class="file-actions">';
-						$output .= '<a href="javascript:void(0)" onclick="window.open(\'' . $file_url . '\', \'_blank\');"" title="'.__('Preview', 'drophtml').'" target="_blank"><i class="dashicons dashicons-visibility"></i></a>';
+						$output .= '<a href="'.$file_url.'" target="_blank" title="'.__('Preview', 'drophtml').'" target="_blank"><i class="dashicons dashicons-visibility"></i></a>';
 						if ($this->isAllowEdit($dir . '/' . $ff)) {
 							$output .= '<a href="javascript:void(0)" title="'.__('Edit', 'drophtml').'" class="edit-tree-file" data-ext="'.$this->getFileExt($ff).'" data-slug="'.$fileSlug.'" data-file="' . $file_path . '" data-state="0"><i class="dashicons dashicons-edit"></i></a>';
 						}
