@@ -52,10 +52,10 @@ class ContentsView {
 		if (!$this->isValidPostType()) {
 			return false;
 		}
-		wp_enqueue_style('jstree-css', plugins_url('assets/admin/js/themes/default/style.css', DROPHTML__FILE__), [], '1.0.0', 'all');
-		wp_enqueue_style('drops-upload-form', plugins_url('assets/admin/css/style.css', DROPHTML__FILE__), [], '1.0.0', 'all');
-		wp_enqueue_script('jstree', plugins_url('assets/admin/js/jstree.js', DROPHTML__FILE__), ['jquery'], '1.0.0');
-		wp_enqueue_script('drops-upload-form', plugins_url('assets/admin/js/main.js', DROPHTML__FILE__), ['jquery'], '1.0.0');
+		wp_enqueue_style('jstree-css', plugins_url('assets/admin/js/themes/default/style.css', DROPHTML__FILE__), [], DROPHTML__VERSION, 'all');
+		wp_enqueue_style('drops-upload-form', plugins_url('assets/admin/css/style.css', DROPHTML__FILE__), [], DROPHTML__VERSION, 'all');
+		wp_enqueue_script('jstree', plugins_url('assets/admin/js/jstree.js', DROPHTML__FILE__), ['jquery'], DROPHTML__VERSION);
+		wp_enqueue_script('drops-upload-form', plugins_url('assets/admin/js/main.js', DROPHTML__FILE__), ['jquery'], DROPHTML__VERSION);
 	}
 
 	/**
