@@ -27,10 +27,14 @@ class Upload {
 
         add_filter("manage_edit-{$this->post_type}_columns",  [$this, 'add_new_columns']);
         add_filter("manage_edit-{$this->post_type}_sortable_columns", [$this, 'register_sortable_columns']);
-        add_filter("request", [$this, 'hits_column_orderby']);
         add_filter('post_row_actions', [$this, 'action_row'], 10, 2);
         add_action('before_delete_post', [$this, 'delete_all_attached_media']);
-    }
+
+		add_action('wp_ajax_delete_tree_folder', [$this, 'delete_tree_folder']);
+		add_action('wp_ajax_delete_tree_file', [$this, 'delete_tree_file']);
+		add_action('wp_ajax_save_tree_file', [$this, 'save_tree_file']);
+		add_action('wp_ajax_upload_to_tree_folder', [$this, 'upload_to_tree_folder']);
+	}
 
     /**
      * Helper function to check correct post type.
@@ -46,7 +50,7 @@ class Upload {
      * Load pload metabox
      */
     public function add_custom_meta_boxes() {  
-        add_meta_box('wp_custom_attachment', 'Drop File', [ $this, 'wp_custom_attachment' ], $this->post_type, 'normal', 'high');  
+        add_meta_box('wp_custom_attachment', __( 'Drop File', 'drophtml' ), [ $this, 'wp_custom_attachment' ], $this->post_type, 'normal', 'high');  
     }
 
     /**
@@ -133,6 +137,20 @@ class Upload {
         if ( ! $this->isValidPostType() ) {
             return false;
         }
+		if (isset($_POST['post_name']) && !empty($_POST['post_name'])) {
+			$post = get_post($id);
+			$newslug = $_POST['post_name'];
+			$drop_url = get_post_meta($id, 'drop_preview_url', true);
+			$new_drop_url = trailingslashit(get_site_url()) . trailingslashit('drop') . $newslug;
+			/**
+			 * Rename Folder
+			 */
+			$oldpath = str_replace(site_url('/'), ABSPATH, esc_url($drop_url));
+			$newpath = str_replace(site_url('/'), ABSPATH, esc_url($new_drop_url));
+			if (rename($oldpath, $newpath)) {
+				update_post_meta($id, 'drop_preview_url', $new_drop_url);
+			}
+		}
         if(!empty($_FILES['wp_custom_attachment']['name'])) {
             $supported_types = array('application/zip', 'application/octet-stream', 'application/x-zip-compressed','multipart/x-zip');
             $arr_file_type = wp_check_filetype(basename($_FILES['wp_custom_attachment']['name']));
@@ -141,17 +159,17 @@ class Upload {
             if( in_array($uploaded_type, $supported_types) ) {
                 $upload = wp_upload_bits($_FILES['wp_custom_attachment']['name'], null, file_get_contents($_FILES['wp_custom_attachment']['tmp_name']));
                 if(isset($upload['error']) && $upload['error'] != 0) {
-                    wp_die('There was an error uploading your file. The error is: ' . $upload['error']);
+                    wp_die( __( 'There was an error uploading your file. The error is:', 'drophtml' ) . ' ' . $upload['error']);
                 } else {
                     $extract = $this->unZipToBaseFolder($id, $upload['file'], $_FILES['wp_custom_attachment']['name'], false );
                     if ($extract) {
                         update_post_meta($id, 'wp_custom_attachment', $upload);
                     } else {
-                        wp_die("Error extracting the file.");
+                        wp_die( __( 'Error extracting the file.', 'drophtml') );
                     }
                 }
             } else {
-                wp_die("The file type that you've uploaded is not a ZIP file.");
+                wp_die(__('The file type that you\'ve uploaded is not a ZIP file.', 'drophtml') );
             }
         }
     }
@@ -179,27 +197,15 @@ class Upload {
      * @param Array $columns - Current columns on the list post
      */
     public function add_new_columns($columns){
-        $column_meta = array( 'username' => 'Username' );
+        $column_meta = array( 'username' => __( 'Username', 'drophtml' ) );
         $columns = array_slice( $columns, 0, 6, true ) + $column_meta + array_slice( $columns, 6, NULL, true );
         return $columns;
     }
 
     // Register the columns as sortable
     public function register_sortable_columns( $columns ) {
-        $columns['hits'] = 'hits';
         $columns['username'] = 'username';
         return $columns;
-    }
-
-    //Add filter to the request to make the hits sorting process numeric, not string
-    public function hits_column_orderby( $vars ) {
-        if ( isset( $vars['orderby'] ) && 'hits' == $vars['orderby'] ) {
-            $vars = array_merge( $vars, array(
-                'meta_key' => 'hits',
-                'orderby' => 'meta_value_num'
-            ) );
-        }
-        return $vars;
     }
 
     /**
@@ -213,12 +219,8 @@ class Upload {
         global $post;
 
         switch ( $column ) {
-            case 'hits':
-                $hits = get_post_meta( $post->ID, 'hits', true );
-                echo (int)$hits;
-            break;
             case 'username':
-                echo get_the_author_meta('user_login', $post->post_author);
+                echo get_the_author_meta( 'user_login', $post->post_author );
                 break;
         }
     }
@@ -228,7 +230,7 @@ class Upload {
             unset($actions['view']);
             unset($actions['inline hide-if-no-js']);
             $url = get_post_meta($post->ID, 'drop_preview_url', true);
-            $actions['demo'] = '<a href="'. $url . '/">Preview</a>';
+            $actions['demo'] = '<a href="'. $url . '/" target="_blank">'. __( 'Preview', 'drophtml' ) . '</a>';
         }
         return $actions;
     }
@@ -243,5 +245,111 @@ class Upload {
             }
         }
     }
+	function deleteDirectory($dir) {
+		if (!file_exists($dir)) {
+			return true;
+		}
+		if (!is_dir($dir)) {
+			return unlink($dir);
+		}
+		foreach (scandir($dir) as $item) {
+			if ($item == '.' || $item == '..') {
+				continue;
+			}
+			if (!$this->deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+				return false;
+			}
+		}
+
+		return rmdir($dir);
+	}
+
+	function delete_tree_folder() {
+		$result = '0';
+		if (isset($_POST['folder']) && !empty($_POST['folder'])) {
+			/*$zipfile = $_POST['zip'];
+			$zip = new \ZipArchive();
+			$zip->open($zipfile);
+			$zip->deleteName($file);
+			$zip->close();*/
+
+			$folder = $_POST['folder'];
+			$folder_path = trailingslashit(ABSPATH) . $folder;
+			if (file_exists($folder_path)) {
+				$this->deleteDirectory($folder_path);
+			}
+			$result = '1';
+		}
+		echo $result;
+		exit;
+	}
+	
+	function delete_tree_file() {
+		$result = '0';
+		if (isset($_POST['file']) && !empty($_POST['file'])) {
+			/*$zipfile = $_POST['zip'];
+			$zip = new \ZipArchive();
+			$zip->open($zipfile);
+			$zip->deleteName($file);
+			$zip->close();*/
+
+			$file = $_POST['file'];
+			$file_path = trailingslashit(ABSPATH) . $file;
+			if (file_exists($file_path)) {
+				unlink($file_path);
+			}
+			$result = '1';
+		}
+		echo $result;
+		exit;
+	}
+	
+	function save_tree_file() {
+		$result = '0';
+		if (isset($_POST['file']) && !empty($_POST['file'])) {
+			$file = $_POST['file'];
+			$content = $_POST['content'];
+			$content = stripslashes($content);
+			$file_path = trailingslashit(ABSPATH) . $file;
+			
+			$update = file_put_contents($file_path, $content);
+			if ($update !== false) {
+				$result = '1';
+			}
+		}
+		echo $result;
+		exit;
+	}
+
+	function upload_to_tree_folder() {
+		$result = '0';
+		if (isset($_POST['folder']) && !empty($_POST['folder'])) {
+			$folder = $_POST['folder'];
+			$folder_path = trailingslashit(ABSPATH) . $folder;
+			if ($_FILES) {
+				require_once(ABSPATH . "wp-admin" . '/includes/image.php');
+				require_once(ABSPATH . "wp-admin" . '/includes/file.php');
+				require_once(ABSPATH . "wp-admin" . '/includes/media.php');
+				$files = $_FILES['tf'];
+				$count = 0;
+				foreach ($files['name'] as $count => $value) {
+					if ($files['name'][$count]) {
+						$file = array(
+							'name' => $files['name'][$count],
+							'type' => $files['type'][$count],
+							'tmp_name' => $files['tmp_name'][$count],
+							'error' => $files['error'][$count],
+							'size' => $files['size'][$count]
+						);
+						$new_file = $folder_path . '/' . $file['name'];
+						$move_new_file = @move_uploaded_file( $file['tmp_name'], $new_file );
+					}
+				}
+				$result = '1';
+			}
+		}
+		echo $result;
+		exit;
+	}
 
 }

@@ -18,6 +18,7 @@ class Plugin {
 	 * @var object
 	 */
 	public static $instance = null;
+	public $data = array();
 
 	/** Magic Methods *********************************************************/
 
@@ -36,7 +37,7 @@ class Plugin {
 	 * @since 1.0.0
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'drophtml' ), '1.0.0' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'drophtml' ), DROPHTML__VERSION);
 	}
 
 	/**
@@ -45,7 +46,7 @@ class Plugin {
 	 * @since 1.0.0
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'drophtml' ), '1.0.0' );
+		_doing_it_wrong( __FUNCTION__, __( 'Cheatin&#8217; huh?', 'drophtml' ), DROPHTML__VERSION);
 	}
 
 	/**
@@ -109,7 +110,7 @@ class Plugin {
 	 */
 	private function setup_globals() {
 		/* Versions **********************************************************/
-		$this->db_version = '100'; // Bumped up on api changes that need a db update for compatibility
+		$this->db_version = '102'; // Bumped up on api changes that need a db update for compatibility
 
 		/* Paths *************************************************************/
 

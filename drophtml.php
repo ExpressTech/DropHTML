@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       DropHTML
  * Description:       Simply drop static HTML zip files and see the magic! 
- * Version:           1.0.0
+ * Version:           1.0.2
  * Requires at least: 4.8
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 } // Exit if accessed directly
 
 define( 'DROPHTML__FILE__', __FILE__ );
+define( 'DROPHTML__VERSION', '1.0.2');
 
 /**
  * DropHtml check PHP version.
@@ -47,7 +48,7 @@ if ( ! drop_html_is_php_version_compatible() ) {
  * @return void
  */
 function drop_html_fail_php_version() {
-    $message = esc_html__( 'DropHtml requires PHP version 5.4+, plugin is currently NOT ACTIVE.', 'drop_html' );
+    $message = esc_html__( 'DropHtml requires PHP version 5.4+, plugin is currently NOT ACTIVE.', 'drophtml' );
     $html_message = sprintf( '<div class="error">%s</div>', wpautop( $message ) );
     echo wp_kses_post( $html_message );
 }
@@ -95,6 +96,6 @@ function drop_html() {
     return DropHtml\Plugin::instance();
 }
 
-if ( ! defined( 'QAZANA_TESTS' ) ) {
+if ( ! defined('DROPHTML_TESTS' ) ) {
     drop_html();
 }
