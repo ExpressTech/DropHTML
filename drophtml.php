@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 } // Exit if accessed directly
 
 define( 'DROPHTML__FILE__', __FILE__ );
+define( 'DROPHTML__VERSION', '1.0.2');
 
 /**
  * DropHtml check PHP version.
