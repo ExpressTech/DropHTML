@@ -18,7 +18,6 @@ Once you upload your zip file you will get /drop/ url which hosts the HTML files
 == Installation ==
 Upload and enjoy.
 
-
 == Changelog ==
 
 = v1.0.2 (March 9, 2020)=
@@ -28,3 +27,6 @@ Upload and enjoy.
 * Feature: Text based editor for html, JS and CSS files
 * Feature: Upload files anywhere in the tree.
 * Feature: New directory tree structure
+
+= v1.0.1 (Feb 1, 2020)=
+* Initial release
