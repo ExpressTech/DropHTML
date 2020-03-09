@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       DropHTML
  * Description:       Simply drop static HTML zip files and see the magic! 
- * Version:           1.0.0
+ * Version:           1.0.2
  * Requires at least: 4.8
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html

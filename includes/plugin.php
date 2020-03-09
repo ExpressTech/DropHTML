@@ -110,7 +110,7 @@ class Plugin {
 	 */
 	private function setup_globals() {
 		/* Versions **********************************************************/
-		$this->db_version = '100'; // Bumped up on api changes that need a db update for compatibility
+		$this->db_version = '102'; // Bumped up on api changes that need a db update for compatibility
 
 		/* Paths *************************************************************/
 
