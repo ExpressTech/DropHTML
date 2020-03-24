@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'DROPHTML__FILE__', __FILE__ );
 define( 'DROPHTML__VERSION', '1.0.2');
+define( 'DROPHTML_POSTTYPE', 'drop');
 
 /**
  * DropHtml check PHP version.

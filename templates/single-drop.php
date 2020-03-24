@@ -1,15 +1,13 @@
 <?php
+do_action('drop_hit', get_the_ID());
+$drop_url = get_post_meta(get_the_ID(), 'drop_preview_url', true);
+/**
+ * Set Base Path;
+ */
+echo '<base href="'.trailingslashit($drop_url).'" target="_blank">';
 
-wp_head();
-
-?>
-<main id="site-content" role="main">
-    <?php
-        $fileView = new \DropHTML\Frontend\ContentsView();
-        echo $fileView->showFileList( get_the_ID() );
-    ?>
-</main><!-- #site-content -->
-
-<?php get_template_part( 'template-parts/footer-menus-widgets' );
-
-wp_footer(); ?>
+if (!empty($drop_url)) {
+	$drop_path = str_replace(site_url('/'), ABSPATH, esc_url($drop_url));
+	include($drop_path.'/index.html');
+}
+die();

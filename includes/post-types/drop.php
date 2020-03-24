@@ -31,8 +31,8 @@ function register_drop_post_type() {
 		'items_list'            => __( 'Items list', 'drophtml' ),
 		'items_list_navigation' => __( 'Items list navigation', 'drophtml' ),
 		'filter_items_list'     => __( 'Filter items list', 'drophtml' ),
-    );
-    
+	);
+
 	$args = array(
 		'label'                 => __( 'Drop', 'drophtml' ),
 		'description'           => __( 'Drop Html', 'drophtml' ),
@@ -51,8 +51,7 @@ function register_drop_post_type() {
 		'publicly_queryable'    => true,
 		'capability_type'       => 'page',
 	);
-	
-	register_post_type( 'drop', $args );
 
+	register_post_type(DROPHTML_POSTTYPE, $args);
 }
 add_action( 'init', 'register_drop_post_type', 0 );

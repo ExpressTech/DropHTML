@@ -16,7 +16,7 @@ class Upload {
         require_once(ABSPATH . '/wp-admin/includes/file.php');
         WP_Filesystem();
 
-        $this->post_type = 'drop';
+        $this->post_type = DROPHTML_POSTTYPE;
         $this->contentsView = new ContentsView();
 
         add_action('admin_enqueue_scripts', [$this->contentsView, 'wp_enqueue_style' ]);

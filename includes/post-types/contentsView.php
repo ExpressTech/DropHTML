@@ -20,13 +20,18 @@ class ContentsView {
 		add_filter('admin_enqueue_scripts', [$this, 'admin_enqueue_scripts']);
 		add_filter('wp_enqueue_scripts', [$this, 'wp_enqueue_style']);
 		add_filter('single_template', [$this, 'frontend_template']);
+
+		add_filter('post_type_link', [$this, 'drop_posttype_remove_slug'], 10, 3);
+		add_filter('wp_unique_post_slug', [$this, 'drop_posttype_prevent_slug_duplicates'], 10, 6);
+		add_action('pre_get_posts', [$this, 'drop_posttype_parse_request']);
+		add_action('drop_hit', [$this, 'drop_posttype_hit_counter'], 10, 1);
 	}
 
 	/**
 	 * Helper function to check correct post type.
 	 */
 	public function isValidPostType() {
-		if ('drop' === get_post_type()) {
+		if (DROPHTML_POSTTYPE === get_post_type()) {
 			return true;
 		}
 		return false;
@@ -233,6 +238,70 @@ class ContentsView {
 		}
 
 		return $template;
+	}
+
+	function drop_posttype_remove_slug($post_link, $post, $leavename) {
+		if (DROPHTML_POSTTYPE != $post->post_type || 'publish' != $post->post_status) {
+			return $post_link;
+		}
+		$post_link = str_replace('/' . $post->post_type . '/', '/', $post_link);
+		return $post_link;
+	}
+
+	function drop_posttype_prevent_slug_duplicates($slug, $post_ID, $post_status, $post_type, $post_parent, $original_slug) {
+		global $wpdb;
+		if (!in_array($post_type, array('post', 'drop', 'page'))) {
+			return $slug;
+		}
+		$is_new_slig = false;
+		if (DROPHTML_POSTTYPE == $post_type) {
+			$post_match = get_page_by_path($slug, 'OBJECT', 'post');
+			$page_match = get_page_by_path($slug, 'OBJECT', 'page');
+			if ($post_match || $page_match) {
+				$is_new_slig = true;
+			}
+		} else {
+			// Saving a POST or PAGE, check for duplicates in custom_post_type post type
+			$custom_post_type_match = get_page_by_path($slug, 'OBJECT', DROPHTML_POSTTYPE);
+			if ($custom_post_type_match) {
+				$is_new_slig = true;
+			}
+		}
+		if ($is_new_slig) {
+			$check_sql = "SELECT post_name FROM `{$wpdb->posts}` WHERE post_name = %s AND post_type = %s AND ID != %d LIMIT 1";
+			$suffix = 2;
+			do {
+				$alt_post_name = _truncate_post_slug($slug, 200 - ( strlen($suffix) + 1 )) . "-$suffix";
+				$post_name_check = $wpdb->get_var($wpdb->prepare($check_sql, $alt_post_name, $post_type, $post_ID));
+				$suffix++;
+			} while ($post_name_check);
+			$slug = $alt_post_name;
+		}
+		return $slug;
+	}
+
+	function drop_posttype_parse_request($query) {
+		if (!$query->is_main_query() || 2 != count($query->query) || !isset($query->query['page'])) {
+			return;
+		}
+		if (!empty($query->query['name'])) {
+			$query->set('post_type', array('post', DROPHTML_POSTTYPE, 'page'));
+		}
+	}
+
+	function drop_posttype_hit_counter($post_id) {
+		if (current_user_can('administrator')) {
+			return;
+		}
+		$post = get_post($post_id);
+		if (!empty($post) && $post->post_type == DROPHTML_POSTTYPE) {
+			$count = get_post_meta($post_id, 'drop_hits', true);
+			if (empty($count)) {
+				$count = 0;
+			}
+			$count++;
+			update_post_meta($post_id, 'drop_hits', $count);
+		}
 	}
 
 }
